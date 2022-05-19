@@ -2,18 +2,12 @@ package com.sena.proyect.hermes.of.cheese.persistence.entity;
 
 import lombok.Getter;
 import lombok.Setter;
-
-import javax.persistence.*;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 @Getter
 @Setter
-@Entity
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = "username"), @UniqueConstraint(columnNames = "dni")})
+@Document(collection = "User")
 public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     private String dni;
     private String name;
     private String lastName;
