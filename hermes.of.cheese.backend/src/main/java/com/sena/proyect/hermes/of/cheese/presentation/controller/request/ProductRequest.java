@@ -7,6 +7,6 @@ import lombok.Setter;
 @Setter
 public class ProductRequest {
     private String name;
-    private Double quantity;
+    private Double quantityInInventory;
     private Double price;
 }

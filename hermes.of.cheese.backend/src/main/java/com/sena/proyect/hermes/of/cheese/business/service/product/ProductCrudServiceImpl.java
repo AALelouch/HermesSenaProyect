@@ -1,8 +1,8 @@
 package com.sena.proyect.hermes.of.cheese.business.service.product;
 
 import com.sena.proyect.hermes.of.cheese.business.mapper.ProductMapper;
+import com.sena.proyect.hermes.of.cheese.business.service.exception.BadRequestException;
 import com.sena.proyect.hermes.of.cheese.business.service.exception.NotFoundException;
-import com.sena.proyect.hermes.of.cheese.business.service.product.interfaceforproduct.ProductCrudService;
 import com.sena.proyect.hermes.of.cheese.persistence.entity.Product;
 import com.sena.proyect.hermes.of.cheese.persistence.repository.ProductRepository;
 import com.sena.proyect.hermes.of.cheese.presentation.controller.request.ProductRequest;
@@ -16,42 +16,43 @@ import java.util.List;
 public class ProductCrudServiceImpl implements ProductCrudService {
 
     @Autowired
-    ProductRepository productRepository;
+    private ProductRepository productRepository;
 
     @Autowired
-    ProductMapper productMapper;
+    private ProductMapper productMapper;
 
     @Override
     public void createProduct(ProductRequest productRequest) {
-        Product product = productMapper.productRequestToProduct(productRequest);
+        Product product = productMapper.toProduct(productRequest);
+        if (productRepository.findById(product.getName()).isPresent()){
+            throw new BadRequestException("El producto ya existe");
+        }
         productRepository.save(product);
     }
 
     @Override
-    public void updateProduct(ProductRequest productRequest, Long id) {
-        Product product = productMapper.productRequestToProduct(productRequest);
-        product.setId(id);
+    public void updateProduct(ProductRequest productRequest) {
+        Product product = productMapper.toProduct(productRequest);
+
+        if (productRepository.findById(product.getName()).isEmpty()){
+            throw new NotFoundException("El producto que desea actualizar no existe");
+        }
+
         productRepository.save(product);
     }
 
     @Override
-    public void deleteProduct(Long id) {
-        productRepository.deleteById(id);
-    }
-
-    @Override
-    public ProductResponse findById(Long id) {
-        return productRepository.findById(id).map
-                (productMapper::productToProductResponse).orElseThrow(() -> new NotFoundException("Producto no encontrado"));
+    public void deleteProduct(String name) {
+        productRepository.delete(productRepository.findById(name).orElseThrow(()-> new NotFoundException("Producto no encontrado")));
     }
 
     @Override
     public ProductResponse findByName(String name) {
-        return productRepository.findByName(name).map(productMapper::productToProductResponse).orElseThrow(() -> new NotFoundException("Producto no encontrado"));
+        return productRepository.findById(name).map(productMapper::toProductResponse).orElseThrow(() -> new NotFoundException("Producto no encontrado"));
     }
 
     @Override
     public List<ProductResponse> findAll() {
-        return productRepository.findAll().stream().map(productMapper::productToProductResponse).collect(java.util.stream.Collectors.toList());
+        return productRepository.findAll().stream().map(productMapper::toProductResponse).collect(java.util.stream.Collectors.toList());
     }
 }

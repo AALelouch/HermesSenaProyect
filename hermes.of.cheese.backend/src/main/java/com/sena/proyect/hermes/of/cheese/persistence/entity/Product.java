@@ -2,20 +2,16 @@ package com.sena.proyect.hermes.of.cheese.persistence.entity;
 
 import lombok.Getter;
 import lombok.Setter;
-
-import javax.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 @Getter
 @Setter
-@Entity
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = "name")})
+@Document(collection = "Product")
 public class Product {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-
-    String name;
-    Double quantity;
-    Double price;
+    private String name;
+    private Double quantityInInventory;
+    private Double price;
 
 }

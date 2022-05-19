@@ -1,8 +1,9 @@
 package com.sena.proyect.hermes.of.cheese.presentation.controller;
 
-import com.sena.proyect.hermes.of.cheese.business.service.product.interfaceforproduct.ProductCrudService;
+import com.sena.proyect.hermes.of.cheese.business.service.product.ProductCrudService;
 import com.sena.proyect.hermes.of.cheese.presentation.controller.request.ProductRequest;
 import com.sena.proyect.hermes.of.cheese.presentation.controller.response.ProductResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/product")
+@SecurityRequirement(name = "bearerAuth")
 public class ProductController {
     @Autowired
     private ProductCrudService productService;
@@ -19,11 +21,6 @@ public class ProductController {
     @GetMapping("/all")
     public ResponseEntity<List<ProductResponse>> allProducts(){
         return ResponseEntity.ok(productService.findAll());
-    }
-
-    @GetMapping("/id/{id}")
-    public ResponseEntity<ProductResponse> getProduct(@PathVariable Long id){
-        return ResponseEntity.ok(productService.findById(id));
     }
 
     @GetMapping("/name/{name}")
@@ -37,16 +34,16 @@ public class ProductController {
         productService.createProduct(productRequest);;
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/update/")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateProduct(@RequestBody ProductRequest productRequest, @PathVariable Long id){
-        productService.updateProduct(productRequest, id);
+    public void updateProduct(@RequestBody ProductRequest productRequest){
+        productService.updateProduct(productRequest);
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteProduct(@PathVariable Long id){
-        productService.deleteProduct(id);
+    public void deleteProduct(@PathVariable String name){
+        productService.deleteProduct(name);
     }
 
 }
