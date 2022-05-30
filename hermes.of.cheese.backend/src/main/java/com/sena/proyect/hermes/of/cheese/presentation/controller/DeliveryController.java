@@ -35,7 +35,7 @@ public class DeliveryController {
         deliveryCrudService.updateDelivery(deliveryRequest, id);
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteById(@PathVariable Long id){
         deliveryCrudService.deleteDelivery(id);

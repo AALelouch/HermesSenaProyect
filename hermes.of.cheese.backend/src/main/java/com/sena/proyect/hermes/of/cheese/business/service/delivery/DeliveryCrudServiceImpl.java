@@ -9,6 +9,7 @@ import com.sena.proyect.hermes.of.cheese.persistence.entity.DeliveryProduct;
 import com.sena.proyect.hermes.of.cheese.persistence.entity.Product;
 import com.sena.proyect.hermes.of.cheese.persistence.repository.DeliveryRepository;
 import com.sena.proyect.hermes.of.cheese.persistence.repository.ProductRepository;
+import com.sena.proyect.hermes.of.cheese.presentation.controller.request.DeliveryProductRequest;
 import com.sena.proyect.hermes.of.cheese.presentation.controller.request.DeliveryRequest;
 import com.sena.proyect.hermes.of.cheese.presentation.controller.response.DeliveryResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +21,13 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-public class DeliveryCrudServiceImpl implements DeliveryCrudService{
+public class DeliveryCrudServiceImpl implements DeliveryCrudService {
 
     @Autowired
     DeliveryRepository deliveryRepository;
 
     @Autowired
-    ProductRepository  productRepository;
+    ProductRepository productRepository;
 
     @Autowired
     DeliveryMapper deliveryMapper;
@@ -50,37 +51,54 @@ public class DeliveryCrudServiceImpl implements DeliveryCrudService{
 
         //Set each product in the List of document
         //For each element of delivery product name, the method set a delivery product for the document
-        deliveryRequest.getDeliveryProductName().forEach(deliveryProductName -> products.forEach(product -> {
+        deliveryRequest.getDeliveryProductName().forEach(deliveryProductName -> {
 
-            if (Objects.equals(deliveryProductName.getName().toLowerCase(), product.getName().toLowerCase())) {
-                DeliveryProduct deliveryProduct = new DeliveryProduct();
-                deliveryProduct.setName(product.getName());
-                deliveryProduct.setPrice(product.getPrice());
-                deliveryProduct.setQuantity(deliveryProductName.getQuantity());
-                deliveryProduct.setTotal((deliveryProduct.getQuantity() * deliveryProduct.getPrice()));
+            Product product = findProductOfRequest(products, deliveryProductName);
 
-                deliveryProducts.add(deliveryProduct);
+            DeliveryProduct deliveryProduct = buildDeliveryProduct(product, deliveryProductName);
 
-                //Sum total price of delivery
-                delivery.setTotalOfAll(delivery.getTotalOfAll() + deliveryProduct.getTotal());
+            deliveryProducts.add(deliveryProduct);
 
-                if (product.getQuantityInInventory() < deliveryProduct.getQuantity()) {
-                    throw new BadRequestException("La cantidad del producto " + deliveryProduct.getName() + " no esta disponible");
-                }
+            //Sum total price of delivery
+            delivery.setTotalOfAll(delivery.getTotalOfAll() + deliveryProduct.getTotal());
 
-                //Set quantity of product in the inventory
-                product.setQuantityInInventory(product.getQuantityInInventory() - deliveryProductName.getQuantity());
-            }
-        }));
+            //Validate the quantity
+            validateQuantity(product, deliveryProduct);
 
-        if (deliveryProducts.size() < deliveryRequest.getDeliveryProductName().size()){
-            throw new BadRequestException("No se ha encontrado el nombre del producto");
-        }
+            //Set quantity of product in the inventory
+            product.setQuantityInInventory(product.getQuantityInInventory() - deliveryProductName.getQuantity());
+
+        });
 
         delivery.setDeliveryProduct(deliveryProducts);
-        productRepository.saveAll(products);
 
+        saveDataDelivery(products, delivery);
+    }
+
+    public DeliveryProduct buildDeliveryProduct(Product product, DeliveryProductRequest deliveryProductRequest) {
+            DeliveryProduct deliveryProduct = new DeliveryProduct();
+            deliveryProduct.setName(product.getName());
+            deliveryProduct.setPrice(product.getPrice());
+            deliveryProduct.setQuantity(deliveryProductRequest.getQuantity());
+            deliveryProduct.setTotal((deliveryProduct.getQuantity() * deliveryProduct.getPrice()));
+            return deliveryProduct;
+    }
+
+    public Product findProductOfRequest(List<Product> deliveryProducts, DeliveryProductRequest deliveryProductRequest) {
+        return deliveryProducts.stream().filter(product -> product.getName().equals(deliveryProductRequest.getName())).findFirst().orElseThrow(() -> new BadRequestException("No se ha encontrado el nombre del producto"));
+    }
+
+
+
+    public void saveDataDelivery(List<Product> products, Delivery delivery){
+        productRepository.saveAll(products);
         deliveryRepository.save(delivery);
+    }
+
+    public void validateQuantity(Product product, DeliveryProduct deliveryProduct){
+        if (product.getQuantityInInventory() < deliveryProduct.getQuantity()) {
+            throw new BadRequestException("La cantidad del producto " + deliveryProduct.getName() + " no esta disponible");
+        }
     }
 
     @Override
@@ -99,37 +117,28 @@ public class DeliveryCrudServiceImpl implements DeliveryCrudService{
 
         //Set each product in the List of document
         //For each element of delivery product name, the method set a delivery product for the document
-        deliveryRequest.getDeliveryProductName().forEach(deliveryProductName -> products.forEach(product -> {
+        deliveryRequest.getDeliveryProductName().forEach(deliveryProductName -> {
 
-            if (Objects.equals(deliveryProductName.getName().toLowerCase(), product.getName().toLowerCase())) {
-                DeliveryProduct deliveryProduct = new DeliveryProduct();
-                deliveryProduct.setName(product.getName());
-                deliveryProduct.setPrice(product.getPrice());
-                deliveryProduct.setQuantity(deliveryProductName.getQuantity());
-                deliveryProduct.setTotal((deliveryProduct.getQuantity() * deliveryProduct.getPrice()));
+            Product product = findProductOfRequest(products, deliveryProductName);
 
-                deliveryProducts.add(deliveryProduct);
+            DeliveryProduct deliveryProduct = buildDeliveryProduct(product, deliveryProductName);
 
-                //Sum total price of delivery
-                delivery.setTotalOfAll(delivery.getTotalOfAll() + deliveryProduct.getTotal());
+            deliveryProducts.add(deliveryProduct);
 
-                if (product.getQuantityInInventory() < deliveryProduct.getQuantity()) {
-                    throw new BadRequestException("La cantidad del producto " + deliveryProduct.getName() + " no esta disponible");
-                }
+            //Sum total price of delivery
+            delivery.setTotalOfAll(delivery.getTotalOfAll() + deliveryProduct.getTotal());
 
-                //Set quantity of product in the inventory
-                product.setQuantityInInventory(product.getQuantityInInventory() - deliveryProductName.getQuantity());
-            }
-        }));
+            //Validate the quantity
+            validateQuantity(product, deliveryProduct);
 
-        if (deliveryProducts.size() < deliveryRequest.getDeliveryProductName().size()){
-            throw new BadRequestException("No se ha encontrado el nombre del producto");
-        }
+            //Set quantity of product in the inventory
+            product.setQuantityInInventory(product.getQuantityInInventory() - deliveryProductName.getQuantity());
+
+        });
 
         delivery.setDeliveryProduct(deliveryProducts);
-        productRepository.saveAll(products);
 
-        deliveryRepository.save(delivery);
+        saveDataDelivery(products, delivery);
 
     }
 
@@ -140,13 +149,13 @@ public class DeliveryCrudServiceImpl implements DeliveryCrudService{
 
     @Override
     public DeliveryResponse findById(Long id) {
-        return deliveryRepository.findById(id).map(deliveryMapper::toResponse).orElseThrow(()->new NotFoundException("Pedido con id: " + id + " no ha sido encontrado"));
+        return deliveryRepository.findById(id).map(deliveryMapper::toResponse).orElseThrow(() -> new NotFoundException("Pedido con id: " + id + " no ha sido encontrado"));
     }
 
     @Override
     public void deleteDelivery(Long id) {
 
-        if (deliveryRepository.findById(id).isEmpty()){
+        if (deliveryRepository.findById(id).isEmpty()) {
             throw new NotFoundException("No se ha encontrado el producto con id: " + id);
         }
 
