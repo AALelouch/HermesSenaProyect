@@ -18,4 +18,6 @@ public class DeliveryRequest {
 
     @JsonIgnore
     private LocalDateTime dateDelivery = LocalDateTime.now();
+
+
 }

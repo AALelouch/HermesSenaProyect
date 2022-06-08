@@ -13,6 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/delivery")
 @SecurityRequirement(name = "bearerAuth")
+@CrossOrigin(origins = "http://localhost:4200")
 public class DeliveryController {
 
     @Autowired
