@@ -14,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/product")
 @SecurityRequirement(name = "bearerAuth")
+@CrossOrigin(origins = "*")
 public class ProductController {
     @Autowired
     private ProductCrudService productService;
