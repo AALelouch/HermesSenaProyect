@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/product")
 @SecurityRequirement(name = "bearerAuth")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 public class ProductController {
     @Autowired
     private ProductCrudService productService;
@@ -25,7 +25,7 @@ public class ProductController {
     }
 
     @GetMapping("/name/{name}")
-    public ResponseEntity<ProductResponse> getProductByName(@PathVariable String name){
+    public ResponseEntity<ProductResponse> getProductByName(@PathVariable String name) {
         return ResponseEntity.ok(productService.findByName(name));
     }
 
@@ -35,13 +35,13 @@ public class ProductController {
         productService.createProduct(productRequest);;
     }
 
-    @PutMapping("/update/")
+    @PutMapping("/update/{name}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateProduct(@RequestBody ProductRequest productRequest){
-        productService.updateProduct(productRequest);
+    public void updateProduct(@RequestBody ProductRequest productRequest, @PathVariable String name){
+        productService.updateProduct(productRequest, name);
     }
 
-    @DeleteMapping("/delete/")
+    @DeleteMapping("/delete/{name}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProduct(@PathVariable String name){
         productService.deleteProduct(name);

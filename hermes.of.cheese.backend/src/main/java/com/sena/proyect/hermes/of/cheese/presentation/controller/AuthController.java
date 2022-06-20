@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/auth")
@@ -51,6 +52,10 @@ public class AuthController {
     public ResponseEntity<?> signupUser(@RequestBody User signUpRequest) {
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             return new ResponseEntity<>("Fail -> Username is already taken!", HttpStatus.BAD_REQUEST);
+        }if (Objects.equals(signUpRequest.getUsername(), "")){
+            return  new ResponseEntity<>("Fail -> Username don't be blank", HttpStatus.BAD_REQUEST);
+        }if (signUpRequest.getPassword().length() < 8){
+            return new ResponseEntity<>("Fail -> Password must have almost 8 characters", HttpStatus.BAD_REQUEST);
         }
 
         signUpRequest.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));

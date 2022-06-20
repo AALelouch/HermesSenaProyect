@@ -31,10 +31,10 @@ public class ProductCrudServiceImpl implements ProductCrudService {
     }
 
     @Override
-    public void updateProduct(ProductRequest productRequest) {
+    public void updateProduct(ProductRequest productRequest, String name) {
         Product product = productMapper.toProduct(productRequest);
 
-        if (productRepository.findById(product.getName()).isEmpty()){
+        if (productRepository.findById(name).isEmpty()){
             throw new NotFoundException("El producto que desea actualizar no existe");
         }
 

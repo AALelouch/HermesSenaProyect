@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ProductCrudService {
     void createProduct(ProductRequest productRequest);
-    void updateProduct(ProductRequest productRequest);
+    void updateProduct(ProductRequest productRequest, String name);
     void deleteProduct(String name);
 
     ProductResponse findByName(String name);

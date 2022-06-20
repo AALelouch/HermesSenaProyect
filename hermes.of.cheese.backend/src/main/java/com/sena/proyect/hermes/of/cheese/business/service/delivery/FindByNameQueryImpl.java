@@ -24,8 +24,6 @@ public class FindByNameQueryImpl implements FindByNameQuery {
 
     @Override
     public List<DeliveryResponse> findByName(String name) {
-        return deliveryRepository.findByNameCustomer(name).stream()
-                .map(deliveryMapper::toResponse)
-                .collect(Collectors.toList());
+        return deliveryRepository.findByNameCustomer(name).stream().map(deliveryMapper::toResponse).collect(Collectors.toList());
     }
 }
